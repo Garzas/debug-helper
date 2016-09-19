@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">DebugHelper</string>
+    <string name="mock_off_message">MOCK MODE OFF</string>
+    <string name="clear_counter">CLEAR COUNTER</string>
+    <string name="macro_list">Macro List</string>
+    <string name="macro_guide">Fill the gaps and click create macro to save fields</string>
+    <string name="create_macro">CREATE MACRO FROM CURRENT ACTIVITY</string>
+    <string name="mock_mode">Mock Mode</string>
+    <string name="not_implemented_install">You need to implement DebugHelper.install() in Your Application.class to use this feature</string>
+    <string name="interceptor_not_implemented">You need to implement DebugInterceptor in Your OkHttpClient object to use this feature</string>
+    <string name="edit_macro">EditMacro</string>
+
+</resources>
