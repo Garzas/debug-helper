@@ -23,20 +23,17 @@ public class DetailsActivity extends BaseActivity {
     @Inject
     DetailsPresenter presenter;
 
-    public static Intent newIntent(Context context) {
+    public static Intent newIntent(final Context context) {
         return new Intent(context, DetailsActivity.class);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
-        DetailsActivityComponent component = (DetailsActivityComponent) getActivityComponent();
+        final DetailsActivityComponent component = (DetailsActivityComponent) getActivityComponent();
         component.inject(this);
         ButterKnife.inject(this);
-
-
-
 
 
     }
