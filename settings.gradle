@@ -1,1 +1,1 @@
-include ':app', ':debug-helper'
+include ':app', ':debug-helper', 'debug-helper-no-op'

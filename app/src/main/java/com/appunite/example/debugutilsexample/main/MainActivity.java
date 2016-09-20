@@ -64,12 +64,10 @@ public class MainActivity extends BaseActivity {
 
         subscription.set(new CompositeSubscription(
                 presenter.getTitleObservable()
-                        .compose(this.<String>bindToLifecycle())
                         .subscribe(RxTextView.text(simpleText)),
                 presenter.clickObservable()
                         .subscribe(RxContextMore.startActivity(this, DetailsActivity.newIntent(this))),
                 presenter.getItemListObservable()
-                        .compose(this.<List<MainPresenter.BaseItem>>bindToLifecycle())
                         .subscribe(new Observer<List<MainPresenter.BaseItem>>() {
                             @Override
                             public void onCompleted() {
