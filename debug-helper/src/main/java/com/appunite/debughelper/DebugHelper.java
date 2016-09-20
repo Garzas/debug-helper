@@ -345,4 +345,8 @@ public class DebugHelper {
     public static void interceptorEnabled() {
         isInterceptorInstalled = true;
     }
+
+    public static void resetActivity() {
+        currentActivity = null;
+    }
 }

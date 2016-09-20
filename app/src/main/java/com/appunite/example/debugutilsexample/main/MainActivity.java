@@ -13,8 +13,10 @@ import com.appunite.example.debugutilsexample.BaseActivity;
 import com.appunite.example.debugutilsexample.R;
 import com.appunite.example.debugutilsexample.dagger.ActivityModule;
 import com.appunite.example.debugutilsexample.dagger.BaseActivityComponent;
+import com.appunite.example.debugutilsexample.details.DetailsActivity;
 import com.appunite.example.debugutilsexample.presenter.MainPresenter;
 import com.appunite.example.debugutilsexample.view.ColoredSnackBar;
+import com.appunite.rx.android.widget.RxContextMore;
 import com.jakewharton.rxbinding.widget.RxTextView;
 
 import java.util.List;
@@ -64,6 +66,8 @@ public class MainActivity extends BaseActivity {
                 presenter.getTitleObservable()
                         .compose(this.<String>bindToLifecycle())
                         .subscribe(RxTextView.text(simpleText)),
+                presenter.clickObservable()
+                        .subscribe(RxContextMore.startActivity(this, DetailsActivity.newIntent(this))),
                 presenter.getItemListObservable()
                         .compose(this.<List<MainPresenter.BaseItem>>bindToLifecycle())
                         .subscribe(new Observer<List<MainPresenter.BaseItem>>() {
@@ -91,14 +95,6 @@ public class MainActivity extends BaseActivity {
 
         ));
 
-//        Observable.just(new Object())
-//                .compose(this.bindToLifecycle())
-//                .subscribe(new Action1<Object>() {
-//                    @Override
-//                    public void call(Object o) {
-//                        startActivity(DetailsActivity.newIntent(MainActivity.this));
-//                    }
-//                });
     }
 
     @Override
