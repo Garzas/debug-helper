@@ -305,6 +305,7 @@ public class DebugHelper {
         if (appActivity != null) {
             appContext.stopService(new Intent(appActivity, MacroService.class));
         }
+        appActivity = null;
     }
 
     public static void install(Context context) {
@@ -347,6 +348,7 @@ public class DebugHelper {
     public static void resetActivity() {
         currentActivity = null;
         drawerLayout = null;
-
+        appActivity = null;
+        debugAdapter = null;
     }
 }
