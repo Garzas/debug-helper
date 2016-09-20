@@ -100,6 +100,7 @@ public class MacroService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (chatHead != null) windowManager.removeView(chatHead);
+        activity = null;
     }
 
     public interface DeployMacroListener {

@@ -58,8 +58,6 @@ public class DebugHelper {
     private static ScalpelFrameLayout scalpelFrame;
     private static DebugHelperPreferences debugPreferences;
     private static DebugAdapter debugAdapter;
-    private static DisplayMetrics metrics;
-    private static ViewGroup mainFrame;
     private static RecyclerView debugRecyclerView;
     private static DrawerLayout drawerLayout;
     private static Activity appActivity;
@@ -84,7 +82,7 @@ public class DebugHelper {
         root = currentActivity.getLayoutInflater().inflate(R.layout.debug_layout, null);
 
         drawerLayout = (DrawerLayout) root;
-        mainFrame = (ViewGroup) root.findViewById(R.id.main_frame);
+        final ViewGroup mainFrame = (ViewGroup) root.findViewById(R.id.main_frame);
         mainFrame.removeAllViews();
         mainFrame.addView(child);
 
@@ -115,7 +113,7 @@ public class DebugHelper {
         debugRecyclerView.setLayoutManager(layoutManager);
         debugRecyclerView.setAdapter(debugAdapter);
 
-        metrics = new DisplayMetrics();
+        final DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         subscription.set(Subscriptions.from(
@@ -307,6 +305,7 @@ public class DebugHelper {
         if (appActivity != null) {
             appContext.stopService(new Intent(appActivity, MacroService.class));
         }
+        appActivity = null;
     }
 
     public static void install(Context context) {
@@ -344,5 +343,12 @@ public class DebugHelper {
 
     public static void interceptorEnabled() {
         isInterceptorInstalled = true;
+    }
+
+    public static void resetActivity() {
+        currentActivity = null;
+        drawerLayout = null;
+        appActivity = null;
+        debugAdapter = null;
     }
 }

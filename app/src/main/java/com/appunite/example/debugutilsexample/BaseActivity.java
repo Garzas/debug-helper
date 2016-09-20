@@ -2,14 +2,14 @@ package com.appunite.example.debugutilsexample;
 
 import android.os.Bundle;
 
-import com.appunite.debughelper.base.RxDebugActivity;
+import com.appunite.debughelper.base.DebugActivity;
 import com.appunite.example.debugutilsexample.dagger.BaseActivityComponent;
 import com.appunite.example.debugutilsexample.dagger.BaseActivityComponentProvider;
 
 import javax.annotation.Nonnull;
 
 
-public abstract class BaseActivity extends RxDebugActivity implements BaseActivityComponentProvider {
+public abstract class BaseActivity extends DebugActivity implements BaseActivityComponentProvider {
 
     private BaseActivityComponent activityComponent;
 

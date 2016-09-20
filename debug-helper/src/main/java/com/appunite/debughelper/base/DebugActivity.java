@@ -39,6 +39,12 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
     }
 
     @Override
+    protected void onDestroy() {
+        DebugHelper.resetActivity();
+        super.onDestroy();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         DebugHelper.unSubscribe();

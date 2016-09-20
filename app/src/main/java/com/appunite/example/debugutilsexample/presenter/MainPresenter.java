@@ -20,6 +20,7 @@ import rx.Observer;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observers.Observers;
+import rx.subjects.PublishSubject;
 
 public class MainPresenter {
 
@@ -29,6 +30,8 @@ public class MainPresenter {
     private final Observable<List<RepoItem>> repositoriesList;
     @Nonnull
     private final Observable<List<BaseItem>> itemListObservable;
+    @Nonnull
+    private final PublishSubject<Object> clickSubject = PublishSubject.create();
 
     @Inject
     public MainPresenter(@Nonnull final GitHubDao gitHubDao) {
@@ -70,6 +73,11 @@ public class MainPresenter {
     @Nonnull
     public Observable<List<BaseItem>> getItemListObservable() {
         return itemListObservable;
+    }
+
+    @Nonnull
+    public Observable<Object> clickObservable() {
+        return clickSubject;
     }
 
     public abstract static class BaseItem implements SimpleDetector.Detectable<BaseItem> {
@@ -123,6 +131,7 @@ public class MainPresenter {
             return Observers.create(new Action1<Object>() {
                 @Override
                 public void call(Object o) {
+                    clickSubject.onNext(null);
                 }
             });
         }
