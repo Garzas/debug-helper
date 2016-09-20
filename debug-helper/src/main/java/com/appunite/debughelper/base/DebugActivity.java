@@ -20,6 +20,7 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        DebugHelper.setActivity(this);
     }
 
     @Override
@@ -39,6 +40,7 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
 
     @Override
     protected void onDestroy() {
+        DebugHelper.resetActivity();
         super.onDestroy();
     }
 
@@ -46,13 +48,11 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
     protected void onPause() {
         super.onPause();
         DebugHelper.unSubscribe();
-        DebugHelper.resetActivity();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        DebugHelper.setActivity(this);
         DebugHelper.reSubscribe(this);
     }
 
