@@ -76,7 +76,7 @@ public class DebugPresenter {
     @Nonnull
     private final Observable<Object> interceptorNotImplemented;
     @Nonnull
-    private final PublishSubject httpCodeChangedSubject = PublishSubject.create();
+    private final PublishSubject<Object> httpCodeChangedSubject = PublishSubject.create();
     @Nonnull
     private final Observable<Boolean> pinMacroObservable;
 
@@ -115,21 +115,13 @@ public class DebugPresenter {
         @Nonnull
         private final String title;
 
-        public CategoryItem(@Nonnull String title) {
+        public CategoryItem(@Nonnull final String title) {
             this.title = title;
         }
 
         @Nonnull
         public String getTitle() {
             return title;
-        }
-
-        public Observer<Object> clickObserver() {
-            return Observers.create(new Action1<Object>() {
-                @Override
-                public void call(Object o) {
-                }
-            });
         }
 
     }
@@ -141,7 +133,7 @@ public class DebugPresenter {
         @Nonnull
         private final String value;
 
-        public InformationItem(@Nonnull String name, @Nonnull String value) {
+        public InformationItem(@Nonnull final String name, @Nonnull final String value) {
             this.name = name;
             this.value = value;
         }
@@ -174,13 +166,6 @@ public class DebugPresenter {
             return Objects.hashCode(name, value);
         }
 
-        public Observer<Object> clickObserver() {
-            return Observers.create(new Action1<Object>() {
-                @Override
-                public void call(Object o) {
-                }
-            });
-        }
     }
 
     public class OptionItem extends BaseDebugItem {
@@ -329,9 +314,9 @@ public class DebugPresenter {
 
         @Nonnull
         private final String name;
-        private int action;
+        private final int action;
 
-        public ActionItem(@Nonnull String name, int action) {
+        public ActionItem(@Nonnull final String name, final int action) {
             this.name = name;
             this.action = action;
         }
@@ -435,7 +420,7 @@ public class DebugPresenter {
                 .map(new Func1<Object, List<BaseDebugItem>>() {
                     @Override
                     public List<BaseDebugItem> call(Object o) {
-                        return ImmutableList.<BaseDebugItem>of(
+                        return ImmutableList.of(
                                 new SwitchItem("FPS Label", DebugOption.FPS_LABEL, DebugHelper.isFpsVisible(), false),
                                 new InformationItem("LeakCanary", "enabled"),
                                 new ActionItem("Show Log", DebugOption.SHOW_LOG));
@@ -552,7 +537,7 @@ public class DebugPresenter {
                 })
                 .map(new Func1<Integer, String>() {
                     @Override
-                    public String call(Integer integer) {
+                    public String call(final Integer integer) {
                         return "d";
                     }
                 });
@@ -594,7 +579,7 @@ public class DebugPresenter {
 
 
     @Nonnull
-    public Observable<List<BaseDebugItem>> simpleListObservable() {
+    public Observable<List<BaseDebugItem>> debugListObservable() {
         return simpleListSubject;
     }
 

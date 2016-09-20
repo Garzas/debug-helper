@@ -19,7 +19,7 @@ public class GitHubDao {
     private final Observable<List<Repos>> reposObservable;
 
     @Inject
-    public GitHubDao(final GitHubService service, Scheduler uiScheduler, Scheduler networkScheduler) {
+    public GitHubDao(final GitHubService service, final Scheduler uiScheduler, final Scheduler networkScheduler) {
 
         reposObservable = service.getRepos()
                 .subscribeOn(networkScheduler)

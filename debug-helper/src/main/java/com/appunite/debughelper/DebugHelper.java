@@ -119,7 +119,7 @@ public class DebugHelper {
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         subscription.set(Subscriptions.from(
-                debugPresenter.simpleListObservable()
+                debugPresenter.debugListObservable()
                         .subscribe(debugAdapter),
 
                 Observable.just(activity.getResources().getDisplayMetrics().density * 160f)

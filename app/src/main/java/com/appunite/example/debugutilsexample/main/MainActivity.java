@@ -27,7 +27,9 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import retrofit2.adapter.rxjava.HttpException;
 import rx.Observer;
-
+import rx.subscriptions.CompositeSubscription;
+import rx.subscriptions.SerialSubscription;
+import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends BaseActivity {
 
@@ -44,46 +46,50 @@ public class MainActivity extends BaseActivity {
     @InjectView(R.id.main_content)
     View view;
 
+    private final SerialSubscription subscription = new SerialSubscription();
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MainActivityComponent component = (MainActivityComponent) getActivityComponent();
+        final MainActivityComponent component = (MainActivityComponent) getActivityComponent();
         component.inject(this);
         ButterKnife.inject(this);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
-        presenter.getTitleObservable()
-                .compose(this.<String>bindToLifecycle())
-                .subscribe(RxTextView.text(simpleText));
+        subscription.set(new CompositeSubscription(
+                presenter.getTitleObservable()
+                        .compose(this.<String>bindToLifecycle())
+                        .subscribe(RxTextView.text(simpleText)),
+                presenter.getItemListObservable()
+                        .compose(this.<List<MainPresenter.BaseItem>>bindToLifecycle())
+                        .subscribe(new Observer<List<MainPresenter.BaseItem>>() {
+                            @Override
+                            public void onCompleted() {
 
-        presenter.getItemListObservable()
-                .compose(this.<List<MainPresenter.BaseItem>>bindToLifecycle())
-                .subscribe(new Observer<List<MainPresenter.BaseItem>>() {
-                    @Override
-                    public void onCompleted() {
+                            }
 
-                    }
+                            @Override
+                            public void onError(final Throwable e) {
+                                Log.e("DebugHelper", e.getMessage());
+                                if (e instanceof HttpException) {
+                                    ColoredSnackBar
+                                            .error(view, e.getMessage(), Snackbar.LENGTH_SHORT)
+                                            .show();
+                                }
+                            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("DebugHelper", e.getMessage());
-                        if (e instanceof HttpException) {
-                            ColoredSnackBar
-                                    .error(view, e.getMessage(), Snackbar.LENGTH_SHORT)
-                                    .show();
-                        }
-                    }
+                            @Override
+                            public void onNext(final List<MainPresenter.BaseItem> baseItems) {
+                                Log.d("DebugHelper", "onNext");
+                                adapter.call(baseItems);
+                            }
+                        })
 
-                    @Override
-                    public void onNext(List<MainPresenter.BaseItem> baseItems) {
-                        Log.d("DebugHelper", "onNext");
-                        adapter.call(baseItems);
-                    }
-                });
+        ));
 
 //        Observable.just(new Object())
 //                .compose(this.bindToLifecycle())
@@ -93,6 +99,12 @@ public class MainActivity extends BaseActivity {
 //                        startActivity(DetailsActivity.newIntent(MainActivity.this));
 //                    }
 //                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        subscription.set(Subscriptions.empty());
     }
 
     @Nonnull

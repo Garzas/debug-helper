@@ -7,4 +7,5 @@ public class DetailsPresenter {
     @Inject
     public DetailsPresenter() {
     }
+
 }
