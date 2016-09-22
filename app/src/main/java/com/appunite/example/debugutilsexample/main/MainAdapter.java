@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.Observable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -92,9 +93,14 @@ public class MainAdapter extends RecyclerView.Adapter<BaseViewHolder> implements
         @InjectView(R.id.repo_description)
         TextView description;
 
+        @Nonnull
+        private final Observable<Void> clickObservable;
+
         public MainViewHolder(@Nonnull View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
+            clickObservable = RxView.clicks(itemView)
+                    .share();
         }
 
         @Override
@@ -103,7 +109,7 @@ public class MainAdapter extends RecyclerView.Adapter<BaseViewHolder> implements
             text.setText(repoItem.getName());
             description.setText(repoItem.getDescription());
             subscription = new CompositeSubscription(
-                    RxView.clicks(text).subscribe(repoItem.clickObserver())
+                    clickObservable.subscribe(repoItem.clickObserver())
             );
         }
 
