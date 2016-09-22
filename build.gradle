@@ -23,3 +23,14 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext {
+    minSdkVersion = 16
+    compileSdkVersion = 23
+    targetSdkVersion = compileSdkVersion
+    buildToolsVersion = '23.0.2'
+    javaVersion = JavaVersion.VERSION_1_7
+
+    GROUP = 'com.github.garzas.debug-helper'
+    VERSION_NAME = "0.0.7"
+}
