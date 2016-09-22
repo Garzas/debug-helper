@@ -350,5 +350,8 @@ public class DebugHelper {
         drawerLayout = null;
         appActivity = null;
         debugAdapter = null;
+        debugPresenter = null;
+        debugRecyclerView = null;
+        scalpelFrame = null;
     }
 }
