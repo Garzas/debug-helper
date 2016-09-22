@@ -2,6 +2,13 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.garzas.debug-helper-no-op'
+version='0.0.6'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
 
 android {
     compileSdkVersion 23
