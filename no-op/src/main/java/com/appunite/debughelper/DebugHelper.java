@@ -1,5 +1,7 @@
 package com.appunite.debughelper;
 
+import android.content.Context;
+
 import com.appunite.debughelper.interceptor.SampleInterceptor;
 
 import okhttp3.Interceptor;
