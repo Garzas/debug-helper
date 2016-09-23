@@ -17,7 +17,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         setupGraph();
-        DebugHelper.install(this);
+//        DebugHelper.install(this);
     }
 
     private void setupGraph() {

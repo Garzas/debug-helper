@@ -302,7 +302,7 @@ public class DebugHelper {
 
     public static void unSubscribe() {
         subscription.set(Subscriptions.empty());
-        if (appActivity != null) {
+        if (appActivity != null && appContext != null) {
             appContext.stopService(new Intent(appActivity, MacroService.class));
         }
         appActivity = null;
