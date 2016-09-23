@@ -10,14 +10,14 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.appunite.debughelper.DebugHelperPreferences;
-import com.appunite.debughelper.utils.DebugOption;
 import com.appunite.debughelper.R;
 import com.appunite.debughelper.interceptor.DebugInterceptor;
 import com.appunite.debughelper.presenter.DebugPresenter;
-import com.google.common.collect.ImmutableList;
+import com.appunite.debughelper.utils.DebugOption;
 import com.jakewharton.rxbinding.view.RxView;
 import com.jakewharton.rxbinding.widget.RxCompoundButton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -306,7 +306,7 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
     }
 
     @Nonnull
-    private List<DebugPresenter.BaseDebugItem> baseDebugItems = ImmutableList.of();
+    private List<DebugPresenter.BaseDebugItem> baseDebugItems = new ArrayList<>();
 
     @Nonnull
     private DebugHelperPreferences debugPreferences;

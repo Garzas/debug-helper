@@ -3,10 +3,10 @@ package com.appunite.debughelper.interceptor;
 import android.util.Log;
 
 import com.appunite.debughelper.DebugHelper;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class DebugInterceptor {
         DebugHelper.interceptorEnabled();
         final Response.Builder newResponse;
         final Gson gson = new Gson();
-        final List<Object> arrayList = ImmutableList.of(new Object());
+        final List<Object> arrayList = new ArrayList<>();
         final String emptyJson;
         final Request request = chain.request();
         final Response response = chain.proceed(request);

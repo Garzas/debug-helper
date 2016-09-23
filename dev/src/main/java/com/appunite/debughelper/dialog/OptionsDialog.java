@@ -7,8 +7,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.appunite.debughelper.model.SelectOption;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.squareup.haha.guava.collect.FluentIterable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,13 +41,12 @@ public class OptionsDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
 
-        final String[] strings = Iterables.toArray(Iterables.transform(selectOption.getValues(), new Function<Integer, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable Integer input) {
-                return input.toString();
-            }
-        }), String.class);
+        final ArrayList<String> stringArrayList = new ArrayList<>();
+        for (final Integer value : selectOption.getValues()) {
+            stringArrayList.add(value.toString());
+        }
+
+        final String[] strings = (String[]) stringArrayList.toArray();
 
         return new AlertDialog.Builder(getActivity(), android.R.style.Theme_DeviceDefault_Dialog)
                 .setSingleChoiceItems(strings, selectOption.getCurrentPosition(), new DialogInterface.OnClickListener() {

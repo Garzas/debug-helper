@@ -1,19 +1,19 @@
 package com.appunite.debughelper.presenter;
 
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
 
 import com.appunite.debughelper.DebugHelper;
 import com.appunite.debughelper.interceptor.DebugInterceptor;
-import com.appunite.debughelper.utils.DebugOption;
-import com.appunite.debughelper.utils.DebugTools;
 import com.appunite.debughelper.model.SelectOption;
 import com.appunite.debughelper.model.SwitchOption;
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
+import com.appunite.debughelper.utils.DebugOption;
+import com.appunite.debughelper.utils.DebugTools;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -81,9 +81,11 @@ public class DebugPresenter {
     private final Observable<Boolean> pinMacroObservable;
 
     public abstract static class BaseDebugItem {
+
     }
 
     public class MainItem extends BaseDebugItem {
+
         private boolean mock;
         private boolean debug;
 
@@ -150,20 +152,18 @@ public class DebugPresenter {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof InformationItem)) {
-                return false;
-            }
-            InformationItem that = (InformationItem) o;
-            return Objects.equal(name, that.name)
-                    && Objects.equal(value, that.value);
+            if (this == o) return true;
+            if (!(o instanceof InformationItem)) return false;
+
+            final InformationItem that = (InformationItem) o;
+            return name.equals(that.name) && value.equals(that.value);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(name, value);
+            int result = name.hashCode();
+            result = 31 * result + (value.hashCode());
+            return result;
         }
 
     }
@@ -217,20 +217,21 @@ public class DebugPresenter {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof OptionItem)) {
-                return false;
-            }
-            OptionItem that = (OptionItem) o;
-            return Objects.equal(name, that.name)
-                    && Objects.equal(values, that.values);
+            if (this == o) return true;
+            if (!(o instanceof OptionItem)) return false;
+
+            final OptionItem that = (OptionItem) o;
+            return name.equals(that.name) && (values == that.values)
+                    && option == that.option
+                    && currentPosition == that.currentPosition
+                    && mockDepends == that.mockDepends;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(name, values);
+            int result = name.hashCode();
+            result = 31 * result + (values.hashCode());
+            return result;
         }
 
         public Observer<Object> clickObserver() {
@@ -264,7 +265,6 @@ public class DebugPresenter {
             this.mockDepends = mockDepends;
         }
 
-
         @Nonnull
         public String getTitle() {
             return title;
@@ -284,20 +284,21 @@ public class DebugPresenter {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof SwitchItem)) {
-                return false;
-            }
-            SwitchItem that = (SwitchItem) o;
-            return Objects.equal(title, that.title)
-                    && Objects.equal(option, that.option);
+            if (this == o) return true;
+            if (!(o instanceof SwitchItem)) return false;
+
+            final SwitchItem that = (SwitchItem) o;
+            return title.equals(that.title)
+                    && option == that.option
+                    && staticSwitcher == that.staticSwitcher
+                    && mockDepends == that.mockDepends;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(title, option);
+            int result = title.hashCode();
+            result = 31 * result + (staticSwitcher.hashCode());
+            return result;
         }
 
         public Observer<Boolean> switchOption() {
@@ -332,20 +333,19 @@ public class DebugPresenter {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (!(o instanceof ActionItem)) {
-                return false;
-            }
-            ActionItem that = (ActionItem) o;
-            return Objects.equal(name, that.name)
-                    && Objects.equal(action, that.action);
+            if (this == o) return true;
+            if (!(o instanceof ActionItem)) return false;
+
+            final ActionItem that = (ActionItem) o;
+            return name.equals(that.name)
+                    && action == that.action;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(name, action);
+            int result = name.hashCode();
+            result = 31 * result;
+            return result;
         }
 
         public Observer<Object> actionOption() {
@@ -378,16 +378,19 @@ public class DebugPresenter {
                 new Func3<String, Float, ActivityManager.MemoryInfo, List<InformationItem>>() {
                     @Override
                     public List<InformationItem> call(String resolution, Float density, ActivityManager.MemoryInfo mi) {
-                        return ImmutableList.of(
-                                new InformationItem("Model", Build.MANUFACTURER + " " + Build.MODEL),
-                                new InformationItem("SDK", DebugTools.checkSDKName(
-                                        Build.VERSION.SDK_INT)
-                                        + "(" + Build.VERSION.SDK_INT
-                                        + " API)"),
-                                new InformationItem("Release", Build.VERSION.RELEASE),
-                                new InformationItem("Resolution", resolution),
-                                new InformationItem("Density", Math.round(density) + "dpi"),
-                                new InformationItem("Free Memory", (mi.availMem / 1048576L) + " MB"));
+                        final ArrayList<InformationItem> newList = new ArrayList<>();
+
+                        newList.add(new InformationItem("Model", Build.MANUFACTURER + " " + Build.MODEL));
+                        newList.add(new InformationItem("SDK", DebugTools.checkSDKName(
+                                Build.VERSION.SDK_INT)
+                                + "(" + Build.VERSION.SDK_INT
+                                + " API)"));
+                        newList.add(new InformationItem("Release", Build.VERSION.RELEASE));
+                        newList.add(new InformationItem("Resolution", resolution));
+                        newList.add(new InformationItem("Density", Math.round(density) + "dpi"));
+                        newList.add(new InformationItem("Free Memory", (mi.availMem / 1048576L) + " MB"));
+
+                        return newList;
                     }
                 });
 
@@ -395,13 +398,13 @@ public class DebugPresenter {
                 .map(new Func1<Float, List<InformationItem>>() {
                     @Override
                     public List<InformationItem> call(Float density) {
-                        return ImmutableList.of(
-                                new InformationItem("Name", DebugTools.getApplicationName(context)),
-                                new InformationItem("Package", context.getPackageName()),
-                                new InformationItem("Build Type", DebugTools.getBuildType(context)),
-                                new InformationItem("Version", DebugTools.getBuildVersion(context))
-                        );
+                        final ArrayList<InformationItem> newList = new ArrayList<>();
 
+                        newList.add(new InformationItem("Name", DebugTools.getApplicationName(context)));
+                        newList.add(new InformationItem("Package", context.getPackageName()));
+                        newList.add(new InformationItem("Build Type", DebugTools.getBuildType(context)));
+                        newList.add(new InformationItem("Version", DebugTools.getBuildVersion(context)));
+                        return newList;
                     }
                 });
 
@@ -409,10 +412,12 @@ public class DebugPresenter {
                 .map(new Func1<Object, List<BaseDebugItem>>() {
                     @Override
                     public List<BaseDebugItem> call(Object o) {
-                        return ImmutableList.<BaseDebugItem>of(
-                                new SwitchItem("Turn Scalpel ", DebugOption.SET_SCALPEL, false),
-                                new SwitchItem("Draw Views", DebugOption.SCALPEL_DRAW_VIEWS, false),
-                                new SwitchItem("Show Ids", DebugOption.SCALPEL_SHOW_ID, false));
+                        final ArrayList<BaseDebugItem> newList = new ArrayList<>();
+
+                        newList.add(new SwitchItem("Turn Scalpel ", DebugOption.SET_SCALPEL, false));
+                        newList.add(new SwitchItem("Draw Views", DebugOption.SCALPEL_DRAW_VIEWS, false));
+                        newList.add(new SwitchItem("Show Ids", DebugOption.SCALPEL_SHOW_ID, false));
+                        return newList;
                     }
                 });
 
@@ -420,13 +425,14 @@ public class DebugPresenter {
                 .map(new Func1<Object, List<BaseDebugItem>>() {
                     @Override
                     public List<BaseDebugItem> call(Object o) {
-                        return ImmutableList.of(
-                                new SwitchItem("FPS Label", DebugOption.FPS_LABEL, DebugHelper.isFpsVisible(), false),
-                                new InformationItem("LeakCanary", "enabled"),
-                                new ActionItem("Show Log", DebugOption.SHOW_LOG));
+                        final ArrayList<BaseDebugItem> newList = new ArrayList<>();
+
+                        newList.add(new SwitchItem("FPS Label", DebugOption.FPS_LABEL, DebugHelper.isFpsVisible(), false));
+                        newList.add(new InformationItem("LeakCanary", "enabled"));
+                        newList.add(new ActionItem("Show Log", DebugOption.SHOW_LOG));
+                        return newList;
                     }
                 });
-
 
         Observable.combineLatest(
                 deviceInfoList,
@@ -441,19 +447,20 @@ public class DebugPresenter {
                             List<InformationItem> buildInfo,
                             List<BaseDebugItem> scalpelUtils,
                             List<BaseDebugItem> utils) {
-                        return ImmutableList.<BaseDebugItem>builder()
-                                .add(new MainItem(true, true))
-                                .add(new CategoryItem("Device Information"))
-                                .addAll(deviceInfo)
-                                .add(new CategoryItem("About app"))
-                                .addAll(buildInfo)
-                                .add(new CategoryItem("Macro"))
-                                .add(new ActionItem("Show Macro", DebugOption.SHOW_MACRO))
-                                .add(new SwitchItem("Pin", DebugOption.PIN_MACRO, false, false))
-                                .add(new CategoryItem("OKHTTP options"))
-                                .add(new SwitchItem("Return empty response", DebugOption.SET_EMPTY_RESPONSE, DebugInterceptor.getEmptyResponse(), true))
-                                .add(new OptionItem("Http code", DebugOption.SET_HTTP_CODE,
-                                        ImmutableList.of(200,
+                        final ArrayList<BaseDebugItem> debugList = new ArrayList<>();
+
+                                debugList.add(new MainItem(true, true));
+                                debugList.add(new CategoryItem("Device Information"));
+                                debugList.addAll(deviceInfo);
+                                debugList.add(new CategoryItem("About app"));
+                                debugList.addAll(buildInfo);
+                                debugList.add(new CategoryItem("Macro"));
+                                debugList.add(new ActionItem("Show Macro", DebugOption.SHOW_MACRO));
+                                debugList.add(new SwitchItem("Pin", DebugOption.PIN_MACRO, false, false));
+                                debugList.add(new CategoryItem("OKHTTP options"));
+                                debugList.add(new SwitchItem("Return empty response", DebugOption.SET_EMPTY_RESPONSE, DebugInterceptor.getEmptyResponse(), true));
+                                debugList.add(new OptionItem("Http code", DebugOption.SET_HTTP_CODE,
+                                        Arrays.asList(200,
                                                 201, 202, 203, 204, 205,
                                                 206, 300, 301, 302, 303,
                                                 304, 305, 400, 401, 402,
@@ -461,18 +468,17 @@ public class DebugPresenter {
                                                 408, 409, 410, 411, 412,
                                                 413, 414, 415, 500, 501,
                                                 502, 503, 504, 505),
-                                        DebugTools.selectHttpCodePosition(DebugInterceptor.getResponseCode()), true))
-                                .add(new ActionItem("Request counter", DebugOption.SHOW_REQUEST))
-                                .add(new CategoryItem("Scalpel Utils"))
-                                .addAll(scalpelUtils)
-                                .add(new CategoryItem("Tools"))
-                                .addAll(utils)
-                                .build();
+                                        DebugTools.selectHttpCodePosition(DebugInterceptor.getResponseCode()), true));
+                                debugList.add(new ActionItem("Request counter", DebugOption.SHOW_REQUEST));
+                                debugList.add(new CategoryItem("Scalpel Utils"));
+                                debugList.addAll(scalpelUtils);
+                                debugList.add(new CategoryItem("Tools"));
+                                debugList.addAll(utils);
+                        return debugList;
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(simpleListSubject);
-
 
         scalpelObservable = switchOptionSubject
                 .filter(new Func1<SwitchOption, Boolean>() {
@@ -576,7 +582,6 @@ public class DebugPresenter {
             }
         };
     }
-
 
     @Nonnull
     public Observable<List<BaseDebugItem>> debugListObservable() {

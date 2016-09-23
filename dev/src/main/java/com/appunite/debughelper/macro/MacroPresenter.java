@@ -11,10 +11,6 @@ import android.widget.Spinner;
 
 import com.appunite.debughelper.DebugHelperPreferences;
 import com.appunite.debughelper.model.EditMacro;
-import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -26,7 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import rx.Observable;
 import rx.Observer;
@@ -138,14 +133,14 @@ public class MacroPresenter {
         }.getType();
         final List<MacroPresenter.MacroItem> macroItems = gson.fromJson(json, collectionType);
 
-        return Lists.newArrayList(Iterables
-                .filter(macroItems, new Predicate<MacroItem>() {
-                    @Override
-                    public boolean apply(@Nullable final MacroPresenter.MacroItem input) {
-                        assert input != null;
-                        return input.getActivityName().equals(activity.getClass().getSimpleName());
-                    }
-                }));
+        final ArrayList<MacroItem> filteredItems = new ArrayList<>();
+        for (final MacroItem macroItem : macroItems) {
+            if (macroItem.getActivityName().equals(activity.getClass().getSimpleName())) {
+                filteredItems.add(macroItem);
+            }
+        }
+
+        return filteredItems;
     }
 
     private static Gson createGson() {
@@ -269,18 +264,23 @@ public class MacroPresenter {
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof MacroItem)) return false;
-            final MacroItem macroItem = (MacroItem) o;
-            return Objects.equal(baseFieldItems, macroItem.baseFieldItems) &&
-                    Objects.equal(activityName, macroItem.activityName) &&
-                    Objects.equal(macroName, macroItem.macroName);
+
+            final MacroItem that = (MacroItem) o;
+            return  id.equals(that.id)
+                    && activityName.equals(that.activityName)
+                    && isSelected == that.isSelected
+                    && macroName.equals(that.macroName)
+                    && baseFieldItems == that.baseFieldItems;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(baseFieldItems, activityName, macroName);
+            int result = id.hashCode();
+            result = 31 * result + (baseFieldItems.hashCode());
+            return result;
         }
 
     }
