@@ -53,7 +53,6 @@ dependencies {
     testCompile 'com.google.dagger:dagger-compiler:2.0.2'
     testCompile 'com.google.truth:truth:0.26'
 
-    compile 'com.google.guava:guava:18.0'
     compile 'com.google.code.gson:gson:2.4'
     provided 'javax.annotation:jsr250-api:1.0'
     provided 'com.google.code.findbugs:annotations:3.0.0'
