@@ -11,7 +11,6 @@ import com.appunite.debughelper.model.SwitchOption;
 import com.appunite.debughelper.utils.DebugOption;
 import com.appunite.debughelper.utils.DebugTools;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +28,8 @@ import rx.observers.Observers;
 import rx.subjects.BehaviorSubject;
 import rx.subjects.PublishSubject;
 
+import static com.appunite.debughelper.DebugHelper.getDebugPreferences;
+
 public class DebugPresenter {
 
     @Nonnull
@@ -36,47 +37,38 @@ public class DebugPresenter {
     @Nonnull
     private final PublishSubject<SwitchOption> switchOptionSubject = PublishSubject.create();
     @Nonnull
-    private final Observable<Boolean> scalpelObservable;
-    @Nonnull
-    private final Observable<List<BaseDebugItem>> scalpelUtilsList;
-    @Nonnull
-    private final Observable<Boolean> drawViewsObservable;
-    @Nonnull
-    private final Observable<Boolean> showIdObservable;
-    @Nonnull
-    private final Observable<List<BaseDebugItem>> utilList;
-    @Nonnull
-    private final Observable<Boolean> fpsLabelObservable;
-    @Nonnull
     private final PublishSubject<Integer> actionSubject = PublishSubject.create();
     @Nonnull
-    private final Observable<String> showLogObservable;
-    @Nonnull
-    private final Observable<Boolean> changeResponseObservable;
-    @Nonnull
     private final BehaviorSubject<List<BaseDebugItem>> simpleListSubject = BehaviorSubject.create();
-    @Nonnull
-    private final Observable<List<InformationItem>> deviceInfoList;
-    @Nonnull
-    private final Observable<List<InformationItem>> buildInfoList;
     @Nonnull
     private final PublishSubject<Float> densitySubject = PublishSubject.create();
     @Nonnull
     private final PublishSubject<String> resolutionSubject = PublishSubject.create();
     @Nonnull
-    private final Context context;
-    @Nonnull
     private final PublishSubject<Object> recreateActivitySubject = PublishSubject.create();
     @Nonnull
-    private final Observable<ActivityManager.MemoryInfo> memorySubject;
+    private final PublishSubject<Object> httpCodeChangedSubject = PublishSubject.create();
+    @Nonnull
+    private final BehaviorSubject<Boolean> showScalpelSubject = BehaviorSubject.create(false);
+
+    @Nonnull
+    private final Observable<Boolean> scalpelObservable;
+    @Nonnull
+    private final Observable<Boolean> hideViewsObservable;
+    @Nonnull
+    private final Observable<Boolean> showIdObservable;
+    @Nonnull
+    private final Observable<Boolean> fpsLabelObservable;
+    @Nonnull
+    private final Observable<String> showLogObservable;
+    @Nonnull
+    private final Observable<Boolean> changeResponseObservable;
     @Nonnull
     private final Observable<Integer> showRequestObservable;
     @Nonnull
     private final Observable<Integer> showMacroObservable;
     @Nonnull
     private final Observable<Object> interceptorNotImplemented;
-    @Nonnull
-    private final PublishSubject<Object> httpCodeChangedSubject = PublishSubject.create();
     @Nonnull
     private final Observable<Boolean> pinMacroObservable;
 
@@ -176,15 +168,6 @@ public class DebugPresenter {
         @Nonnull
         private final List<Integer> values;
         private int currentPosition;
-        private boolean mockDepends;
-
-        public OptionItem(@Nonnull String name, int option, @Nonnull List<Integer> values, int currentPosition, boolean mockDepends) {
-            this.name = name;
-            this.option = option;
-            this.values = values;
-            this.currentPosition = currentPosition;
-            this.mockDepends = mockDepends;
-        }
 
         public OptionItem(@Nonnull String name, int option, @Nonnull List<Integer> values, int currentPosition) {
             this.name = name;
@@ -211,10 +194,6 @@ public class DebugPresenter {
             return currentPosition;
         }
 
-        public boolean isMockDepends() {
-            return mockDepends;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -223,8 +202,7 @@ public class DebugPresenter {
             final OptionItem that = (OptionItem) o;
             return name.equals(that.name) && (values == that.values)
                     && option == that.option
-                    && currentPosition == that.currentPosition
-                    && mockDepends == that.mockDepends;
+                    && currentPosition == that.currentPosition;
         }
 
         @Override
@@ -250,19 +228,16 @@ public class DebugPresenter {
         private final String title;
         private int option;
         private Boolean staticSwitcher;
-        private Boolean mockDepends;
 
-        public SwitchItem(@Nonnull String title, int option, Boolean staticSwitcher, Boolean mockDepends) {
+        public SwitchItem(@Nonnull String title, int option, Boolean staticSwitcher) {
             this.title = title;
             this.option = option;
             this.staticSwitcher = staticSwitcher;
-            this.mockDepends = mockDepends;
         }
 
-        public SwitchItem(@Nonnull String title, int option, Boolean mockDepends) {
-            this.title = title;
+        public SwitchItem(@Nonnull final String title, final int option) {
             this.option = option;
-            this.mockDepends = mockDepends;
+            this.title = title;
         }
 
         @Nonnull
@@ -278,10 +253,6 @@ public class DebugPresenter {
             return staticSwitcher;
         }
 
-        public Boolean isMockDepends() {
-            return mockDepends;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -290,8 +261,7 @@ public class DebugPresenter {
             final SwitchItem that = (SwitchItem) o;
             return title.equals(that.title)
                     && option == that.option
-                    && staticSwitcher == that.staticSwitcher
-                    && mockDepends == that.mockDepends;
+                    && staticSwitcher == that.staticSwitcher;
         }
 
         @Override
@@ -359,22 +329,23 @@ public class DebugPresenter {
     }
 
     public DebugPresenter(@Nonnull final Context context) {
-        this.context = context;
 
-        memorySubject = Observable.just((Long) null).map(new Func1<Long, ActivityManager.MemoryInfo>() {
-            @Override
-            public ActivityManager.MemoryInfo call(Long aLong) {
-                ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-                ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-                activityManager.getMemoryInfo(mi);
-                return mi;
-            }
-        });
+        final Observable<ActivityManager.MemoryInfo> memoryObservable = Observable.just((Long) null)
+                .mergeWith(Observable.<Long>never())
+                .map(new Func1<Long, ActivityManager.MemoryInfo>() {
+                    @Override
+                    public ActivityManager.MemoryInfo call(Long aLong) {
+                        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+                        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                        activityManager.getMemoryInfo(mi);
+                        return mi;
+                    }
+                });
 
-        deviceInfoList = Observable.combineLatest(
+        final Observable<List<InformationItem>> deviceInfoList = Observable.combineLatest(
                 resolutionSubject,
                 densitySubject,
-                memorySubject,
+                memoryObservable,
                 new Func3<String, Float, ActivityManager.MemoryInfo, List<InformationItem>>() {
                     @Override
                     public List<InformationItem> call(String resolution, Float density, ActivityManager.MemoryInfo mi) {
@@ -394,7 +365,7 @@ public class DebugPresenter {
                     }
                 });
 
-        buildInfoList = densitySubject
+        final Observable<List<InformationItem>> buildInfoList = densitySubject
                 .map(new Func1<Float, List<InformationItem>>() {
                     @Override
                     public List<InformationItem> call(Float density) {
@@ -408,26 +379,29 @@ public class DebugPresenter {
                     }
                 });
 
-        scalpelUtilsList = Observable.just(new Object())
-                .map(new Func1<Object, List<BaseDebugItem>>() {
+        final Observable<List<BaseDebugItem>> scalpelUtilsList = showScalpelSubject
+                .map(new Func1<Boolean, List<BaseDebugItem>>() {
                     @Override
-                    public List<BaseDebugItem> call(Object o) {
+                    public List<BaseDebugItem> call(final Boolean aBoolean) {
                         final ArrayList<BaseDebugItem> newList = new ArrayList<>();
 
-                        newList.add(new SwitchItem("Turn Scalpel ", DebugOption.SET_SCALPEL, false));
-                        newList.add(new SwitchItem("Draw Views", DebugOption.SCALPEL_DRAW_VIEWS, false));
-                        newList.add(new SwitchItem("Show Ids", DebugOption.SCALPEL_SHOW_ID, false));
+                        newList.add(new SwitchItem("Turn Scalpel ", DebugOption.SET_SCALPEL));
+                        if (aBoolean) {
+                            newList.add(new SwitchItem("Hide Views", DebugOption.SCALPEL_HIDE_VIEWS));
+                            newList.add(new SwitchItem("Show Ids", DebugOption.SCALPEL_SHOW_ID));
+                        }
                         return newList;
                     }
                 });
 
-        utilList = Observable.just(new Object())
+        final Observable<List<BaseDebugItem>> utilList = Observable.just(new Object())
+                .mergeWith(Observable.never())
                 .map(new Func1<Object, List<BaseDebugItem>>() {
                     @Override
                     public List<BaseDebugItem> call(Object o) {
                         final ArrayList<BaseDebugItem> newList = new ArrayList<>();
 
-                        newList.add(new SwitchItem("FPS Label", DebugOption.FPS_LABEL, DebugHelper.isFpsVisible(), false));
+                        newList.add(new SwitchItem("FPS Label", DebugOption.FPS_LABEL, DebugHelper.isFpsVisible()));
                         newList.add(new InformationItem("LeakCanary", "enabled"));
                         newList.add(new ActionItem("Show Log", DebugOption.SHOW_LOG));
                         return newList;
@@ -449,31 +423,33 @@ public class DebugPresenter {
                             List<BaseDebugItem> utils) {
                         final ArrayList<BaseDebugItem> debugList = new ArrayList<>();
 
-                                debugList.add(new MainItem(true, true));
-                                debugList.add(new CategoryItem("Device Information"));
-                                debugList.addAll(deviceInfo);
-                                debugList.add(new CategoryItem("About app"));
-                                debugList.addAll(buildInfo);
-                                debugList.add(new CategoryItem("Macro"));
-                                debugList.add(new ActionItem("Show Macro", DebugOption.SHOW_MACRO));
-                                debugList.add(new SwitchItem("Pin", DebugOption.PIN_MACRO, false, false));
-                                debugList.add(new CategoryItem("OKHTTP options"));
-                                debugList.add(new SwitchItem("Return empty response", DebugOption.SET_EMPTY_RESPONSE, DebugInterceptor.getEmptyResponse(), true));
-                                debugList.add(new OptionItem("Http code", DebugOption.SET_HTTP_CODE,
-                                        Arrays.asList(200,
-                                                201, 202, 203, 204, 205,
-                                                206, 300, 301, 302, 303,
-                                                304, 305, 400, 401, 402,
-                                                403, 404, 405, 406, 407,
-                                                408, 409, 410, 411, 412,
-                                                413, 414, 415, 500, 501,
-                                                502, 503, 504, 505),
-                                        DebugTools.selectHttpCodePosition(DebugInterceptor.getResponseCode()), true));
-                                debugList.add(new ActionItem("Request counter", DebugOption.SHOW_REQUEST));
-                                debugList.add(new CategoryItem("Scalpel Utils"));
-                                debugList.addAll(scalpelUtils);
-                                debugList.add(new CategoryItem("Tools"));
-                                debugList.addAll(utils);
+                        debugList.add(new MainItem(true, true));
+                        debugList.add(new CategoryItem("Device Information"));
+                        debugList.addAll(deviceInfo);
+                        debugList.add(new CategoryItem("About app"));
+                        debugList.addAll(buildInfo);
+                        debugList.add(new CategoryItem("Macro"));
+                        debugList.add(new ActionItem("Show Macro", DebugOption.SHOW_MACRO));
+                        debugList.add(new SwitchItem("Pin", DebugOption.PIN_MACRO, false));
+                        debugList.add(new CategoryItem("OKHTTP options"));
+                        if (getDebugPreferences().getMockState()) {
+                            debugList.add(new SwitchItem("Return empty response", DebugOption.SET_EMPTY_RESPONSE, DebugInterceptor.getEmptyResponse()));
+                            debugList.add(new OptionItem("Http code", DebugOption.SET_HTTP_CODE,
+                                    Arrays.asList(200,
+                                            201, 202, 203, 204, 205,
+                                            206, 300, 301, 302, 303,
+                                            304, 305, 400, 401, 402,
+                                            403, 404, 405, 406, 407,
+                                            408, 409, 410, 411, 412,
+                                            413, 414, 415, 500, 501,
+                                            502, 503, 504, 505),
+                                    DebugTools.selectHttpCodePosition(DebugInterceptor.getResponseCode())));
+                            debugList.add(new ActionItem("Request counter", DebugOption.SHOW_REQUEST));
+                        }
+                        debugList.add(new CategoryItem("Scalpel Utils"));
+                        debugList.addAll(scalpelUtils);
+                        debugList.add(new CategoryItem("Tools"));
+                        debugList.addAll(utils);
                         return debugList;
                     }
                 })
@@ -489,11 +465,11 @@ public class DebugPresenter {
                 })
                 .map(checkSet());
 
-        drawViewsObservable = switchOptionSubject
+        hideViewsObservable = switchOptionSubject
                 .filter(new Func1<SwitchOption, Boolean>() {
                     @Override
                     public Boolean call(SwitchOption switchOption) {
-                        return switchOption.getOption() == DebugOption.SCALPEL_DRAW_VIEWS;
+                        return switchOption.getOption() == DebugOption.SCALPEL_HIDE_VIEWS;
                     }
                 })
                 .map(checkSet());
@@ -584,11 +560,6 @@ public class DebugPresenter {
     }
 
     @Nonnull
-    public Observable<List<BaseDebugItem>> debugListObservable() {
-        return simpleListSubject;
-    }
-
-    @Nonnull
     public Observer<Float> densityObserver() {
         return densitySubject;
     }
@@ -601,6 +572,16 @@ public class DebugPresenter {
     @Nonnull
     public Observer<String> resolutionObserver() {
         return resolutionSubject;
+    }
+
+    @Nonnull
+    public Observer<Boolean> showScalpelOptionsObserver() {
+        return showScalpelSubject;
+    }
+
+    @Nonnull
+    public Observable<List<BaseDebugItem>> debugListObservable() {
+        return simpleListSubject;
     }
 
     @Nonnull
@@ -619,8 +600,8 @@ public class DebugPresenter {
     }
 
     @Nonnull
-    public Observable<Boolean> setDrawViewsObservable() {
-        return drawViewsObservable;
+    public Observable<Boolean> setHideViewsObservable() {
+        return hideViewsObservable;
     }
 
     @Nonnull

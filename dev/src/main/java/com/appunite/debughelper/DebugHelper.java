@@ -134,7 +134,10 @@ public class DebugHelper {
                             }
                         }),
 
-                debugPresenter.setDrawViewsObservable()
+                debugPresenter.setScalpelObservable()
+                        .subscribe(debugPresenter.showScalpelOptionsObserver()),
+
+                debugPresenter.setHideViewsObservable()
                         .subscribe(new Action1<Boolean>() {
                             @Override
                             public void call(Boolean aBoolean) {
@@ -264,7 +267,6 @@ public class DebugHelper {
                             }
                         })
         ));
-
 
     }
 
