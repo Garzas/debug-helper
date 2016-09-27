@@ -9,6 +9,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class DebugTools {
 
+    private static boolean isLeakCanaryInstalled = false;
+
     public static String checkSDKName(final int sdkInt) {
         switch (sdkInt) {
             case Build.VERSION_CODES.BASE: // API level 1
@@ -274,5 +276,13 @@ public class DebugTools {
     public static String getApplicationName(@Nonnull final Context context) {
         int stringId = context.getApplicationInfo().labelRes;
         return context.getString(stringId);
+    }
+
+    public static boolean isLeakCanaryInstalled() {
+        return isLeakCanaryInstalled;
+    }
+
+    public static void setLeakCanaryState(final boolean state) {
+        DebugTools.isLeakCanaryInstalled = state;
     }
 }

@@ -48,7 +48,6 @@ import rx.subscriptions.Subscriptions;
 
 public class DebugHelper {
 
-    private static Context appContext;
     private static Boolean fpsVisibility = false;
     private static boolean isInterceptorInstalled = false;
 
@@ -154,34 +153,32 @@ public class DebugHelper {
                         }),
 
                 debugPresenter.getFpsLabelObservable()
-                        .filter(isInstalled())
                         .mergeWith(debugPresenter.getPinMacroObservable())
                         .filter(new Func1<Boolean, Boolean>() {
                             @Override
                             public Boolean call(final Boolean aBoolean) {
-                                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(appContext);
+                                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(appActivity);
                             }
                         })
                         .subscribe(new Action1<Boolean>() {
                             @Override
                             public void call(final Boolean aBoolean) {
                                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        Uri.parse("package:" + appContext.getPackageName()));
+                                        Uri.parse("package:" + appActivity.getPackageName()));
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                appContext.startActivity(intent);
+                                appActivity.startActivity(intent);
                             }
                         }),
 
                 debugPresenter.getFpsLabelObservable()
-                        .filter(isInstalled())
                         .filter(canDrawOverlays())
                         .subscribe(new Action1<Boolean>() {
                             @Override
                             public void call(Boolean isSet) {
                                 if (isSet) {
-                                    TinyDancer.create().show(appContext);
+                                    TinyDancer.create().show(appActivity);
                                 } else {
-                                    TinyDancer.hide(appContext);
+                                    TinyDancer.hide(appActivity);
                                 }
                                 fpsVisibility = isSet;
                             }
@@ -253,9 +250,9 @@ public class DebugHelper {
                             @Override
                             public void call(final Boolean aBoolean) {
                                 if (aBoolean) {
-                                    appContext.startService(MacroService.newInstance(activity));
+                                    appActivity.startService(MacroService.newInstance(activity));
                                 } else {
-                                    appContext.stopService(MacroService.newInstance(activity));
+                                    appActivity.stopService(MacroService.newInstance(activity));
                                 }
                             }
                         }),
@@ -264,6 +261,13 @@ public class DebugHelper {
                             @Override
                             public void call(Object o) {
                                 activity.recreate();
+                            }
+                        }),
+                debugPresenter.getInstallNotImplementedObservable()
+                        .subscribe(new Action1<String>() {
+                            @Override
+                            public void call(final String s) {
+                                Toast.makeText(currentActivity, R.string.not_implemented_install, Toast.LENGTH_LONG).show();
                             }
                         })
         ));
@@ -279,41 +283,27 @@ public class DebugHelper {
         };
     }
 
-    private static Func1<Boolean, Boolean> isInstalled() {
-        return new Func1<Boolean, Boolean>() {
-            @Override
-            public Boolean call(final Boolean aBoolean) {
-                if (appContext == null) {
-                    Toast.makeText(currentActivity, R.string.not_implemented_install, Toast.LENGTH_LONG).show();
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        };
-    }
-
     private static Func1<Boolean, Boolean> canDrawOverlays() {
         return new Func1<Boolean, Boolean>() {
             @Override
             public Boolean call(final Boolean aBoolean) {
-                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(appContext);
+                return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(appActivity);
             }
         };
     }
 
     public static void unSubscribe() {
         subscription.set(Subscriptions.empty());
-        if (appActivity != null && appContext != null) {
-            appContext.stopService(new Intent(appActivity, MacroService.class));
+        if (appActivity != null) {
+            appActivity.stopService(new Intent(appActivity, MacroService.class));
         }
         appActivity = null;
         scalpelFrame = null;
 
     }
 
-    public static void install(Context context) {
-        appContext = context;
+    public static void install(final Context context) {
+        DebugTools.setLeakCanaryState(true);
         if (DebugTools.isDebuggable(context)) {
             LeakCanary.install((Application) context);
         }

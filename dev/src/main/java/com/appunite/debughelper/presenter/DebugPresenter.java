@@ -50,6 +50,8 @@ public class DebugPresenter {
     private final PublishSubject<Object> httpCodeChangedSubject = PublishSubject.create();
     @Nonnull
     private final BehaviorSubject<Boolean> showScalpelSubject = BehaviorSubject.create(false);
+    @Nonnull
+    private final PublishSubject<String> informationSubject = PublishSubject.create();
 
     @Nonnull
     private final Observable<Boolean> scalpelObservable;
@@ -71,6 +73,8 @@ public class DebugPresenter {
     private final Observable<Object> interceptorNotImplemented;
     @Nonnull
     private final Observable<Boolean> pinMacroObservable;
+    @Nonnull
+    private final Observable<String> installNotImplementedObservable;
 
     public abstract static class BaseDebugItem {
 
@@ -156,6 +160,15 @@ public class DebugPresenter {
             int result = name.hashCode();
             result = 31 * result + (value.hashCode());
             return result;
+        }
+
+        public Observer<Object> clickObserver() {
+            return Observers.create(new Action1<Object>() {
+                @Override
+                public void call(Object o) {
+                    informationSubject.onNext(name);
+                }
+            });
         }
 
     }
@@ -402,7 +415,11 @@ public class DebugPresenter {
                         final ArrayList<BaseDebugItem> newList = new ArrayList<>();
 
                         newList.add(new SwitchItem("FPS Label", DebugOption.FPS_LABEL, DebugHelper.isFpsVisible()));
-                        newList.add(new InformationItem("LeakCanary", "enabled"));
+                        if (DebugTools.isLeakCanaryInstalled()) {
+                            newList.add(new InformationItem("LeakCanary", "enabled"));
+                        } else {
+                            newList.add(new InformationItem("LeakCanary", "disabled"));
+                        }
                         newList.add(new ActionItem("Show Log", DebugOption.SHOW_LOG));
                         return newList;
                     }
@@ -431,7 +448,7 @@ public class DebugPresenter {
                         debugList.add(new CategoryItem("Macro"));
                         debugList.add(new ActionItem("Show Macro", DebugOption.SHOW_MACRO));
                         debugList.add(new SwitchItem("Pin", DebugOption.PIN_MACRO, false));
-                        debugList.add(new CategoryItem("OKHTTP options"));
+                        debugList.add(new CategoryItem("OkHttp options"));
                         if (getDebugPreferences().getMockState()) {
                             debugList.add(new SwitchItem("Return empty response", DebugOption.SET_EMPTY_RESPONSE, DebugInterceptor.getEmptyResponse()));
                             debugList.add(new OptionItem("Http code", DebugOption.SET_HTTP_CODE,
@@ -541,6 +558,14 @@ public class DebugPresenter {
                         }
                 );
 
+        installNotImplementedObservable = informationSubject
+                .filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(final String s) {
+                        return s.equals("LeakCanary");
+                    }
+                });
+
         interceptorNotImplemented = Observable.merge(
                 changeResponseObservable,
                 showRequestObservable,
@@ -642,5 +667,10 @@ public class DebugPresenter {
     @Nonnull
     public Observable<Object> interceptorNotImplementedObservable() {
         return interceptorNotImplemented;
+    }
+
+    @Nonnull
+    public Observable<String> getInstallNotImplementedObservable() {
+        return installNotImplementedObservable;
     }
 }

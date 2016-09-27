@@ -127,6 +127,8 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
 
         TextView name;
         TextView value;
+        private Subscription mSubscription;
+
 
         public InformationHolder(@Nonnull final View itemView) {
             super(itemView);
@@ -141,10 +143,19 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             name.setText(informationItem.getName());
             value.setText(informationItem.getValue());
             value.setSelected(true);
+
+            mSubscription = new CompositeSubscription(
+                    RxView.clicks(itemView)
+                    .subscribe(informationItem.clickObserver())
+            );
+
         }
 
         @Override
         public void recycle() {
+            if (mSubscription != null) {
+                mSubscription.unsubscribe();
+            }
         }
 
         public static InformationHolder create(@Nonnull final ViewGroup parent) {
