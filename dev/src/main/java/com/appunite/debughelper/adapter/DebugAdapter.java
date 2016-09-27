@@ -127,6 +127,8 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
 
         TextView name;
         TextView value;
+        private Subscription mSubscription;
+
 
         public InformationHolder(@Nonnull final View itemView) {
             super(itemView);
@@ -141,10 +143,19 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             name.setText(informationItem.getName());
             value.setText(informationItem.getValue());
             value.setSelected(true);
+
+            mSubscription = new CompositeSubscription(
+                    RxView.clicks(itemView)
+                    .subscribe(informationItem.clickObserver())
+            );
+
         }
 
         @Override
         public void recycle() {
+            if (mSubscription != null) {
+                mSubscription.unsubscribe();
+            }
         }
 
         public static InformationHolder create(@Nonnull final ViewGroup parent) {
@@ -177,14 +188,11 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             recycle();
             final DebugPresenter.OptionItem optionItem = (DebugPresenter.OptionItem) item;
 
-            if (optionItem.isMockDepends()) {
-                mockDisabled.setVisibility(getDebugPreferences().getMockState() ? View.GONE : View.VISIBLE);
-            }
-
             button.setText(String.format("%d", DebugInterceptor.getResponseCode()));
             optionName.setText(optionItem.getName());
             mSubscription = new CompositeSubscription(
                     RxView.clicks(button).subscribe(optionItem.clickObserver()));
+
 
         }
 
@@ -210,7 +218,6 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
 
         Switch debugSwitch;
         TextView title;
-        View mockDisabled;
 
         public SwitchHolder(@Nonnull final View itemView, @Nonnull final DebugHelperPreferences debugPreferences) {
             super(itemView);
@@ -218,7 +225,6 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             this.debugPreferences = debugPreferences;
             debugSwitch = (Switch) itemView.findViewById(R.id.debug_switch);
             title = (TextView) itemView.findViewById(R.id.debug_switch_title);
-            mockDisabled = itemView.findViewById(R.id.mock_disabled_layout);
         }
 
         @Override
@@ -227,11 +233,6 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             final DebugPresenter.SwitchItem switchItem = (DebugPresenter.SwitchItem) item;
 
             title.setText(switchItem.getTitle());
-            if (switchItem.isMockDepends()) {
-                mockDisabled.setVisibility(getDebugPreferences().getMockState() ? View.GONE : View.VISIBLE);
-            } else {
-                mockDisabled.setVisibility(View.GONE);
-            }
 
             mSubscription = new CompositeSubscription(
                     Observable.just(switchItem.isStaticSwitcher())
@@ -288,7 +289,6 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
                             .subscribe(actionItem.actionOption())
             );
 
-
         }
 
         @Override
@@ -311,15 +311,14 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
     @Nonnull
     private DebugHelperPreferences debugPreferences;
 
-
     public DebugAdapter(@Nonnull final DebugHelperPreferences debugPreferences) {
         this.debugPreferences = debugPreferences;
     }
 
-
     @Override
     public void call(@Nonnull final List<DebugPresenter.BaseDebugItem> baseDebugItems) {
         this.baseDebugItems = baseDebugItems;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -342,12 +341,10 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
                 + " + make sure your using types correctly");
     }
 
-
     @Override
     public void onBindViewHolder(@Nonnull final BaseDebugHolder holder, final int position) {
         holder.bind(baseDebugItems.get(position));
     }
-
 
     @Override
     public int getItemViewType(final int position) {

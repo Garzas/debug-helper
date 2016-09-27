@@ -61,6 +61,7 @@ public class MainActivity extends BaseActivity {
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        view.performClick();
 
         subscription.set(new CompositeSubscription(
                 presenter.getTitleObservable()

@@ -46,7 +46,7 @@ public class OptionsDialog extends DialogFragment {
             stringArrayList.add(value.toString());
         }
 
-        final String[] strings = (String[]) stringArrayList.toArray();
+        final String[] strings = stringArrayList.toArray(new String[stringArrayList.size()]);
 
         return new AlertDialog.Builder(getActivity(), android.R.style.Theme_DeviceDefault_Dialog)
                 .setSingleChoiceItems(strings, selectOption.getCurrentPosition(), new DialogInterface.OnClickListener() {
