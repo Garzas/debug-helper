@@ -25,17 +25,17 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
 
     @Override
     public void setContentView(final int layoutResID) {
-        super.setContentView(DebugHelper.setContentView(layoutResID));
+        super.setContentView(DebugHelper.setContentView(layoutResID,this));
     }
 
     @Override
     public void setContentView(@Nonnull final View view) {
-        super.setContentView(DebugHelper.setContentView(view));
+        super.setContentView(DebugHelper.setContentView(view,this));
     }
 
     @Override
     public void setContentView(@Nonnull final View view, @Nonnull final ViewGroup.LayoutParams params) {
-        super.setContentView(DebugHelper.setContentView(view), params);
+        super.setContentView(DebugHelper.setContentView(view,this), params);
     }
 
     @Override
@@ -47,7 +47,7 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
     @Override
     protected void onPause() {
         super.onPause();
-        DebugHelper.unSubscribe();
+        DebugHelper.unSubscribe(this);
     }
 
     @Override
@@ -63,7 +63,7 @@ public abstract class DebugActivity extends AppCompatActivity implements Options
 
     @Override
     public void onFinishDialog() {
-        DebugHelper.hide();
+        DebugHelper.hide(this);
     }
 
     @Override
