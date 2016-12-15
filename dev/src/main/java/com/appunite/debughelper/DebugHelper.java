@@ -84,6 +84,7 @@ public class DebugHelper {
     public static void reSubscribe(final Activity activity) {
         debugPreferences = new DebugHelperPreferences(activity.getApplicationContext());
         debugPresenter = new DebugPresenter(activity);
+        debugAdapter = new DebugAdapter(debugPreferences);
 
         final ViewGroup mainView = (ViewGroup) activity.getWindow().getDecorView().findViewById(android.R.id.content);
 
@@ -101,7 +102,6 @@ public class DebugHelper {
         final DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-        if (debugPresenter != null) {
             subscription.set(Subscriptions.from(
                     debugPresenter.debugListObservable()
                             .subscribe(debugAdapter),
@@ -258,7 +258,6 @@ public class DebugHelper {
                                 }
                             })
             ));
-        }
 
     }
 
