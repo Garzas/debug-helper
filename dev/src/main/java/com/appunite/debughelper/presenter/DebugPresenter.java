@@ -462,6 +462,8 @@ public class DebugPresenter {
                                             502, 503, 504, 505),
                                     DebugTools.selectHttpCodePosition(DebugInterceptor.getResponseCode())));
                             debugList.add(new ActionItem("Request counter", DebugOption.SHOW_REQUEST));
+                        } else {
+                            debugList.add(new InformationItem("","Turn on Mock mode to use this feature"));
                         }
                         debugList.add(new CategoryItem("Scalpel Utils"));
                         debugList.addAll(scalpelUtils);

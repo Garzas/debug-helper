@@ -127,6 +127,7 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
 
         TextView name;
         TextView value;
+        View centerView;
         private Subscription mSubscription;
 
 
@@ -134,6 +135,7 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.debug_info_name);
             value = (TextView) itemView.findViewById(R.id.debug_info_value);
+            centerView = itemView.findViewById(R.id.debug_center_view);
         }
 
         @Override
@@ -143,6 +145,12 @@ public class DebugAdapter extends RecyclerView.Adapter<BaseDebugHolder> implemen
             name.setText(informationItem.getName());
             value.setText(informationItem.getValue());
             value.setSelected(true);
+
+            if (informationItem.getName().isEmpty()) {
+                centerView.setVisibility(View.GONE);
+            } else {
+                centerView.setVisibility(View.VISIBLE);
+            }
 
             mSubscription = new CompositeSubscription(
                     RxView.clicks(itemView)
