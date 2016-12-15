@@ -55,6 +55,8 @@ public class DebugHelper {
     private static DebugPresenter debugPresenter = null;
     private static DebugHelperPreferences debugPreferences;
     private static DebugAdapter debugAdapter;
+    private static int drawerGravity = Gravity.RIGHT;
+
 
     public static void setActivity(final Activity activity) {
         debugPreferences = new DebugHelperPreferences(activity.getApplicationContext());
@@ -319,7 +321,11 @@ public class DebugHelper {
     public static void hide(final Activity activity) {
         final View root = activity.getLayoutInflater().inflate(R.layout.debug_layout, null);
         final DrawerLayout drawerLayout = (DrawerLayout) root;
-        drawerLayout.closeDrawer(Gravity.RIGHT);
+        drawerLayout.closeDrawer(drawerGravity);
+    }
+
+    public static void changeGravity(int gravity) {
+        drawerGravity = gravity;
     }
 
     public static void interceptorEnabled() {
