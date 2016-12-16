@@ -32,5 +32,5 @@ ext {
     javaVersion = JavaVersion.VERSION_1_7
 
     GROUP = 'com.github.garzas.debug-helper'
-    VERSION_NAME = "0.0.9"
+    VERSION_NAME = "0.1.1"
 }
