@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.garzas.debug-helper'
-version='0.0.6'
+version='0.1.1'
 
 buildscript {
     repositories {
